@@ -1,0 +1,109 @@
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+
+public class AuctionManagementSystem extends Frame implements ActionListener {
+    private TextField itemNameField, bidAmountField;
+    private TextArea displayArea;
+    private List itemList;
+    private ArrayList<Item> items;
+
+    public AuctionManagementSystem() {
+        items = new ArrayList<>();
+
+        setLayout(new FlowLayout());
+
+        Label itemNameLabel = new Label("Item Name:");
+        itemNameField = new TextField(20);
+        Label bidAmountLabel = new Label("Bid Amount:");
+        bidAmountField = new TextField(20);
+
+        Button addItemButton = new Button("Add Item");
+        Button placeBidButton = new Button("Place Bid");
+        displayArea = new TextArea(10, 40);
+        itemList = new List();
+
+        addItemButton.addActionListener(this);
+        placeBidButton.addActionListener(this);
+
+        add(itemNameLabel);
+        add(itemNameField);
+        add(addItemButton);
+        add(itemList);
+        add(bidAmountLabel);
+        add(bidAmountField);
+        add(placeBidButton);
+        add(displayArea);
+
+        setTitle("Auction Management System");
+        setSize(500, 400);
+        setVisible(true);
+
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent we) {
+                System.exit(0);
+            }
+        });
+    }
+
+    public void actionPerformed(ActionEvent ae) {
+        String command = ae.getActionCommand();
+
+        if (command.equals("Add Item")) {
+            String itemName = itemNameField.getText();
+            if (!itemName.isEmpty()) {
+                Item newItem = new Item(itemName);
+                items.add(newItem);
+                itemList.add(itemName);
+                displayArea.append("Item added: " + itemName + "\n");
+                itemNameField.setText("");
+            }
+        } else if (command.equals("Place Bid")) {
+            String selectedItem = itemList.getSelectedItem();
+            if (selectedItem != null) {
+                try {
+                    double bidAmount = Double.parseDouble(bidAmountField.getText());
+                    for (Item item : items) {
+                        if (item.getName().equals(selectedItem)) {
+                            item.placeBid(bidAmount);
+                            displayArea.append("Bid placed on " + selectedItem + ": " + bidAmount + "\n");
+                            displayArea.append("Highest bid for " + selectedItem + ": " + item.getHighestBid() + "\n");
+                            bidAmountField.setText("");
+                            break;
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    displayArea.append("Invalid bid amount\n");
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        new AuctionManagementSystem();
+    }
+}
+
+class Item {
+    private String name;
+    private double highestBid;
+
+    public Item(String name) {
+        this.name = name;
+        this.highestBid = 0.0;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getHighestBid() {
+        return highestBid;
+    }
+
+    public void placeBid(double bid) {
+        if (bid > highestBid) {
+            highestBid = bid;
+        }
+    }
+}
